@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Confirm Booking</h3>
+<form method="POST">
+    <div class="card p-4 shadow">
+        <p>You're booking a service from provider ID: <strong>{{ provider_id }}</strong></p>
+        <p>Click confirm to complete the booking process. A confirmation email will be sent.</p>
+        <button type="submit" class="btn btn-success">Confirm Booking</button>
+        <a href="{{ url_for('customer_dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

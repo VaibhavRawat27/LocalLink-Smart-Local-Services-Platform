@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Welcome, {{ current_user.username }} (Service Provider)</h2>
+
+<h4>My Bookings</h4>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover shadow">
+        <thead class="table-primary">
+            <tr>
+                <th>Booking ID</th>
+                <th>Customer ID</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.id }}</td>
+                <td>{{ booking.customer_id }}</td>
+                <td><span class="badge bg-info text-dark">{{ booking.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">No bookings yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

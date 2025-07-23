@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-center mb-4">Available Service Providers</h2>
+<div class="row">
+    {% for provider in providers %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-lg rounded-3">
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{ provider.service_name }}</h5>
+                <p class="card-text">{{ provider.description }}</p>
+                <p><strong>Rating:</strong> ⭐ {{ provider.rating }}</p>
+                {% if current_user.is_authenticated and current_user.role == "customer" %}
+                    <a href="{{ url_for('book', provider_id=provider.id) }}" class="btn btn-success">Book Now</a>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#rateModal{{provider.id}}">Rate</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal fade" id="rateModal{{provider.id}}" tabindex="-1">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ url_for('rate', provider_id=provider.id) }}">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rate {{provider.service_name}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label>Rating (1-5)</label>
+                        <input type="number" name="rating" class="form-control" min="1" max="5" required>
+                        <label class="mt-2">Feedback</label>
+                        <textarea name="feedback" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

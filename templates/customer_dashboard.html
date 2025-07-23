@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Welcome, {{ current_user.username }} (Customer)</h2>
+
+<h4 class="mb-3">Explore and Book Services</h4>
+<div class="row">
+    {% for provider in providers %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-lg">
+            <div class="card-body">
+                <h5 class="card-title">{{ provider.service_name }}</h5>
+                <p class="card-text">{{ provider.description }}</p>
+                <p><strong>Rating:</strong> ⭐ {{ provider.rating }}</p>
+                <a href="{{ url_for('book', provider_id=provider.id) }}" class="btn btn-success btn-sm">Book Now</a>
+                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#rateModal{{provider.id}}">Rate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal fade" id="rateModal{{provider.id}}" tabindex="-1">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ url_for('rate', provider_id=provider.id) }}">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rate {{provider.service_name}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label>Rating (1-5)</label>
+                        <input type="number" name="rating" class="form-control" min="1" max="5" required>
+                        <label class="mt-2">Feedback</label>
+                        <textarea name="feedback" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

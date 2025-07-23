@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Chat with {{ provider.username }}</h3>
+<div class="card p-3 mb-3" style="max-height:300px;overflow-y:auto;">
+    {% for c in chats %}
+    <div class="mb-2">
+        <strong>{{ "You" if c.sender_role==current_user.role else provider.username }}:</strong>
+        <span>{{ c.message }}</span>
+        <small class="text-muted">({{ c.timestamp.strftime("%H:%M") }})</small>
+    </div>
+    {% endfor %}
+</div>
+<form method="POST" class="d-flex">
+    <input type="text" name="message" class="form-control me-2" placeholder="Type your message..." required>
+    <button class="btn btn-primary">Send</button>
+</form>
+{% endblock %}
