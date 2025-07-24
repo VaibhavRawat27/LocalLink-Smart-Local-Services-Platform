@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Booking Requests</h3>
+<table class="table table-bordered shadow">
+    <thead class="table-warning">
+        <tr>
+            <th>Customer</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for b in bookings %}
+        <tr>
+            <td>{{ b.customer_name }} ({{ b.customer.email }})</td>
+            <td>{{ b.service.name }}</td>
+            <td>{{ b.date }}</td>
+            <td>{{ b.time }}</td>
+            <td>
+                <span class="badge bg-{{ 'success' if b.status=='Accepted' else 'danger' if b.status=='Rejected' else 'warning' }}">
+                    {{ b.status }}
+                </span>
+            </td>
+            <td>
+                {% if b.status == 'Pending' %}
+                    <a href="{{ url_for('update_booking_status', booking_id=b.id, action='accept') }}" class="btn btn-success btn-sm">Accept</a>
+                    <a href="{{ url_for('update_booking_status', booking_id=b.id, action='reject') }}" class="btn btn-danger btn-sm">Reject</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -51,13 +51,29 @@ class Service(db.Model):
         return round(avg, 1) if avg else 0
 
 
+
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    provider_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
-    status = db.Column(db.String(50), default='Pending')
-    rating = db.Column(db.Integer, default=0)  # ⭐ NEW FIELD (0 means not rated yet)
+    customer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    provider_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
+    customer_name = db.Column(db.String(100))
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String(20))
+    address = db.Column(db.String(200))
+    date = db.Column(db.String(50))
+    time = db.Column(db.String(50))
+    payment_method = db.Column(db.String(20))
+    rating = db.Column(db.Integer, default=0)
+    status = db.Column(db.String(20), default="Pending")
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # ✅ Relationships
+    service = db.relationship('Service', backref='bookings', lazy=True)
+    customer = db.relationship('User', foreign_keys=[customer_id], backref='customer_bookings', lazy=True)
+    provider = db.relationship('User', foreign_keys=[provider_id], backref='provider_bookings', lazy=True)
+
+
 
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,6 +104,13 @@ def index():
     services = Service.query.filter_by(is_available=True).all()
     return render_template('index.html', services=services)
 
+@app.context_processor
+def inject_provider_notifications():
+    """Make provider's pending notification count available globally in templates"""
+    pending_count = 0
+    if current_user.is_authenticated and current_user.role == "provider":
+        pending_count = Booking.query.filter_by(provider_id=current_user.id, status="Pending").count()
+    return dict(provider_pending_count=pending_count)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -214,6 +237,41 @@ def complaint():
     my_complaints = Complaint.query.filter_by(user_id=current_user.id).order_by(Complaint.timestamp.desc()).all()
     return render_template('complaint.html', my_complaints=my_complaints)
 
+@app.route('/customer/notifications')
+@login_required
+def customer_notifications():
+    if current_user.role != 'customer':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('index'))
+
+    notifications = Booking.query.filter_by(customer_id=current_user.id).order_by(Booking.timestamp.desc()).all()
+    return render_template('customer_notifications.html', notifications=notifications)
+
+@app.route('/provider/notifications')
+@login_required
+def provider_notifications():
+    if current_user.role != "provider":
+        flash("Access Denied", "danger")
+        return redirect(url_for('index'))
+
+    bookings = Booking.query.filter_by(provider_id=current_user.id).order_by(Booking.timestamp.desc()).all()
+    return render_template('provider_notifications.html', bookings=bookings)
+
+@app.route('/booking/<int:booking_id>/<action>')
+@login_required
+def update_booking_status(booking_id, action):
+    booking = Booking.query.get_or_404(booking_id)
+    if current_user.id != booking.provider_id:
+        flash("Unauthorized!", "danger")
+        return redirect(url_for('index'))
+
+    if action == "accept":
+        booking.status = "Accepted"
+    elif action == "reject":
+        booking.status = "Rejected"
+    db.session.commit()
+    flash("Booking status updated!", "success")
+    return redirect(url_for('provider_notifications'))
 
 @app.route('/chat/<int:provider_id>', methods=['GET', 'POST'])
 @login_required
@@ -250,6 +308,32 @@ def rate_service(booking_id):
 
     return render_template('rate_service.html', booking=booking)
 
+@app.route('/book/<int:service_id>', methods=['GET', 'POST'])
+@login_required
+def book(service_id):
+    service = Service.query.get_or_404(service_id)
+    provider_id = service.provider_id
+
+    if request.method == 'POST':
+        booking = Booking(
+            customer_id=current_user.id,
+            provider_id=provider_id,
+            service_id=service.id,
+            customer_name=request.form['customer_name'],
+            age=request.form['age'],
+            gender=request.form['gender'],
+            address=request.form['address'],
+            date=request.form['date'],
+            time=request.form['time'],
+            payment_method=request.form['payment_method'],
+            status="Pending"
+        )
+        db.session.add(booking)
+        db.session.commit()
+        flash("Booking request sent to provider!", "success")
+        return redirect(url_for('customer_notifications'))
+
+    return render_template('booking_form.html', service=service)
 
 # ----------- Admin Dashboard ------------
 

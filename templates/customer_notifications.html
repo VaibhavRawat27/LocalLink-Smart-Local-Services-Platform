@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Your Booking Notifications</h3>
+<table class="table table-bordered shadow">
+    <thead class="table-primary">
+        <tr>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for b in notifications %}
+        <tr>
+            <td>{{ b.service.name }}</td>
+            <td>{{ b.date }}</td>
+            <td>{{ b.time }}</td>
+            <td>
+                <span class="badge bg-{{ 'success' if b.status=='Accepted' else 'danger' if b.status=='Rejected' else 'warning' }}">
+                    {{ b.status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

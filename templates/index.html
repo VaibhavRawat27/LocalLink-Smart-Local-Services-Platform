@@ -6,13 +6,13 @@
 <div class="row">
     {% for service in services %}
     <div class="col-md-4 mb-3">
-        <div class="card">
+        <div class="card shadow">
             <div class="card-body">
                 <h5 class="card-title">{{ service.name }}</h5>
                 <p class="card-text">{{ service.description[:100] }}...</p>
                 <p><strong>Price:</strong> ₹{{ service.price }}</p>
                 <p class="text-muted">Location: {{ service.location }}</p>
-               <p>
+ <p>
                 Rating:
                 {% if service.avg_rating > 0 %}
                     {% for i in range(service.avg_rating|round|int) %}
@@ -22,13 +22,16 @@
                 {% else %}
                     No ratings yet
                 {% endif %}
-                </p>
+            </p>
+                {% if current_user.is_authenticated and current_user.role == 'customer' %}
+                    <a href="{{ url_for('book', service_id=service.id) }}" class="btn btn-primary">Book Now</a>
+                {% else %}
+                    <p class="text-muted"><small>Login as a customer to book this service</small></p>
+                {% endif %}
 
-{% if current_user.is_authenticated and current_user.role == 'customer' %}
-    <a href="{{ url_for('hire', service_id=service.id) }}" class="btn btn-primary">Hire</a>
+                {% if current_user.is_authenticated and current_user.role == 'customer' %}
+    <a href="{{ url_for('hire', service_id=service.id) }}" class="btn btn-primary">Rate Now</a>
 {% endif %}
-
-                <!-- <a href="{{ url_for('hire', service_id=service.id) }}" class="btn btn-primary">Hire</a> -->
             </div>
         </div>
     </div>

@@ -1,0 +1,52 @@
+===========================
+   ADMIN ACCOUNT
+===========================
+Username: admin
+Email: admin@example.com
+Password: admin123
+
+===========================
+   SERVICE PROVIDERS
+===========================
+1) Username: john_plumber
+   Email: john_plumber@gmail.com
+   Password: plumber123
+   Location: Delhi
+
+2) Username: ramesh_electric
+   Email: ramesh_electric@gmail.com
+   Password: electric123
+   Location: Mumbai
+
+3) Username: meena_cleaning
+   Email: meena_cleaning@gmail.com
+   Password: clean123
+   Location: Bangalore
+
+4) Username: ali_carpenter
+   Email: ali_carpenter@gmail.com
+   Password: carpenter123
+   Location: Hyderabad
+
+5) Username: kavita_beauty
+   Email: kavita_beauty@gmail.com
+   Password: beauty123
+   Location: Pune
+
+===========================
+   CUSTOMERS
+===========================
+6) Username: arjun_customer
+   Email: arjun@gmail.com
+   Password: customer123
+   Location: Delhi
+
+7) Username: priya_customer
+   Email: priya@gmail.com
+   Password: customer123
+   Location: Bangalore
+
+8) Username: rohit_customer
+   Email: rohit@gmail.com
+   Password: customer123
+   Location: Mumbai
