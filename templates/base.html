@@ -22,6 +22,10 @@
 {% endif %}
 <li class="nav-item"><a class="nav-link" href="{{ url_for('services') }}">Browse Services</a></li>
 
+{% if current_user.is_authenticated %}
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('complaint') }}">Complaint</a></li>
+{% endif %}
+
         </ul>
     </div>
 </nav>

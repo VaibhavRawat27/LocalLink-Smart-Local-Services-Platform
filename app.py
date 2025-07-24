@@ -50,6 +50,7 @@ class Service(db.Model):
         ).scalar()
         return round(avg, 1) if avg else 0
 
+
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -57,6 +58,15 @@ class Booking(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
     status = db.Column(db.String(50), default='Pending')
     rating = db.Column(db.Integer, default=0)  # ⭐ NEW FIELD (0 means not rated yet)
+
+class Complaint(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    complaint_text = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(50), default="Pending")  # Pending/Resolved
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", backref="complaints")
 
 
 class Chat(db.Model):
@@ -175,7 +185,35 @@ def hire(service_id):
     # flash(f'You hired {service.name}! Chat is now enabled.', 'success')
     return redirect(url_for('rate_service', booking_id=new_booking.id))
 
+
+@app.route('/submit_complaint', methods=['POST'])
+@login_required
+def submit_complaint():
+    message = request.form['message']
+    new_complaint = Complaint(user_id=current_user.id, message=message)
+    db.session.add(new_complaint)
+    db.session.commit()
+    flash("Your complaint has been submitted successfully!", "success")
+    return redirect(request.referrer or url_for('index'))
+
+
 # ----------- Chat System ------------
+@app.route('/complaint', methods=['GET', 'POST'])
+@login_required
+def complaint():
+    if request.method == 'POST':
+        complaint_text = request.form['complaint_text']
+        if complaint_text.strip():
+            new_complaint = Complaint(user_id=current_user.id, complaint_text=complaint_text)
+            db.session.add(new_complaint)
+            db.session.commit()
+            flash("Your complaint has been submitted successfully.", "success")
+        else:
+            flash("Complaint cannot be empty.", "danger")
+
+    my_complaints = Complaint.query.filter_by(user_id=current_user.id).order_by(Complaint.timestamp.desc()).all()
+    return render_template('complaint.html', my_complaints=my_complaints)
+
 
 @app.route('/chat/<int:provider_id>', methods=['GET', 'POST'])
 @login_required
@@ -222,16 +260,64 @@ def admin():
         flash('Admin access only.', 'danger')
         return redirect(url_for('index'))
 
-    providers = User.query.filter_by(role='provider').all()
-    customers = User.query.filter_by(role='customer').all()
+    providers = User.query.filter_by(role="provider").all()
+    customers = User.query.filter_by(role="customer").all()
     active_services = Service.query.filter_by(is_available=True).all()
     bookings = Booking.query.all()
+    complaints = Complaint.query.order_by(Complaint.timestamp.desc()).all()
 
-    return render_template('admin_dashboard.html',
-                           providers=providers,
-                           customers=customers,
-                           active_services=active_services,
-                           bookings=bookings)
+    return render_template(
+        'admin_dashboard.html',
+        providers=providers,
+        customers=customers,
+        active_services=active_services,
+        bookings=bookings,
+        complaints=complaints
+    )
+
+# ✅ Delete Provider
+@app.route('/admin/delete_provider/<int:provider_id>')
+@login_required
+def delete_provider(provider_id):
+    if current_user.role == "admin":
+        provider = User.query.get_or_404(provider_id)
+        db.session.delete(provider)
+        db.session.commit()
+        flash("Provider account deleted!", "success")
+    return redirect(url_for('admin'))
+
+# ✅ Delete Customer
+@app.route('/admin/delete_customer/<int:customer_id>')
+@login_required
+def delete_customer(customer_id):
+    if current_user.role == "admin":
+        customer = User.query.get_or_404(customer_id)
+        db.session.delete(customer)
+        db.session.commit()
+        flash("Customer account deleted!", "success")
+    return redirect(url_for('admin'))
+
+# ✅ Delete Service
+@app.route('/admin/delete_service/<int:service_id>')
+@login_required
+def delete_service(service_id):
+    if current_user.role == "admin":
+        service = Service.query.get_or_404(service_id)
+        db.session.delete(service)
+        db.session.commit()
+        flash("Service deleted successfully!", "success")
+    return redirect(url_for('admin'))
+
+# ✅ Mark Complaint Resolved
+@app.route('/admin/resolve_complaint/<int:complaint_id>')
+@login_required
+def resolve_complaint(complaint_id):
+    if current_user.role == "admin":
+        complaint = Complaint.query.get_or_404(complaint_id)
+        complaint.status = "Resolved"
+        db.session.commit()
+        flash("Complaint marked as resolved!", "success")
+    return redirect(url_for('admin'))
 
 
 # -------------------- Run & Auto Admin Creation --------------------

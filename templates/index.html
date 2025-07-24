@@ -13,16 +13,16 @@
                 <p><strong>Price:</strong> ₹{{ service.price }}</p>
                 <p class="text-muted">Location: {{ service.location }}</p>
                <p>
-    Rating:
-    {% if service.avg_rating > 0 %}
-        {% for i in range(service.avg_rating|round|int) %}
-            ⭐
-        {% endfor %}
-        ({{ service.avg_rating }}/5)
-    {% else %}
-        No ratings yet
-    {% endif %}
-</p>
+                Rating:
+                {% if service.avg_rating > 0 %}
+                    {% for i in range(service.avg_rating|round|int) %}
+                        ⭐
+                    {% endfor %}
+                    ({{ service.avg_rating }}/5)
+                {% else %}
+                    No ratings yet
+                {% endif %}
+                </p>
 
 {% if current_user.is_authenticated and current_user.role == 'customer' %}
     <a href="{{ url_for('hire', service_id=service.id) }}" class="btn btn-primary">Hire</a>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Submit a Complaint</h2>
+
+<form method="POST" class="card p-3 shadow">
+    <div class="mb-3">
+        <label for="complaint_text" class="form-label">Your Complaint</label>
+        <textarea class="form-control" name="complaint_text" rows="4" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% if my_complaints %}
+<hr>
+<h4>Your Previous Complaints</h4>
+<ul class="list-group">
+    {% for c in my_complaints %}
+    <li class="list-group-item">
+        <strong>{{ c.timestamp.strftime("%d %b %Y %H:%M") }}</strong>: {{ c.complaint_text }}
+        <span class="badge bg-warning text-dark float-end">{{ c.status }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

@@ -16,6 +16,9 @@
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="bookings-tab" data-bs-toggle="tab" data-bs-target="#bookings" type="button" role="tab">Bookings</button>
     </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="complaints-tab" data-bs-toggle="tab" data-bs-target="#complaints" type="button" role="tab">Complaints</button>
+    </li>
 </ul>
 
 <div class="tab-content" id="adminTabsContent">
@@ -31,6 +34,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Location</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,6 +44,12 @@
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
                         <td>{{ user.location or "N/A" }}</td>
+                        <td>
+                            <a href="{{ url_for('delete_provider', provider_id=user.id) }}" class="btn btn-danger btn-sm"
+                               onclick="return confirm('Delete this provider? All related services will also be removed!');">
+                               Delete
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -59,6 +69,7 @@
                         <th>Provider ID</th>
                         <th>Price</th>
                         <th>Location</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,6 +80,12 @@
                         <td>{{ s.provider_id }}</td>
                         <td>₹{{ s.price }}</td>
                         <td>{{ s.location }}</td>
+                        <td>
+                            <a href="{{ url_for('delete_service', service_id=s.id) }}" class="btn btn-danger btn-sm"
+                               onclick="return confirm('Delete this service?');">
+                               Delete
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -87,6 +104,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Location</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,6 +114,12 @@
                         <td>{{ c.username }}</td>
                         <td>{{ c.email }}</td>
                         <td>{{ c.location or "N/A" }}</td>
+                        <td>
+                            <a href="{{ url_for('delete_customer', customer_id=c.id) }}" class="btn btn-danger btn-sm"
+                               onclick="return confirm('Delete this customer? All related bookings will also be removed!');">
+                               Delete
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -114,6 +138,7 @@
                         <th>Customer ID</th>
                         <th>Provider ID</th>
                         <th>Status</th>
+                        <th>Rating</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,6 +148,49 @@
                         <td>{{ b.customer_id }}</td>
                         <td>{{ b.provider_id }}</td>
                         <td>{{ b.status }}</td>
+                        <td>{{ b.rating if b.rating > 0 else "Not Rated" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ✅ Complaints Tab -->
+    <div class="tab-pane fade" id="complaints" role="tabpanel">
+        <h4>User Complaints</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover shadow-sm">
+                <thead class="table-danger">
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Complaint</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comp in complaints %}
+                    <tr>
+                        <td>{{ comp.id }}</td>
+                        <td>
+                            {{ comp.user.username }}<br>
+                            <small class="text-muted">{{ comp.user.email }}</small>
+                        </td>
+                        <td>{{ comp.complaint_text }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if comp.status=='Resolved' else 'warning' }}">
+                                {{ comp.status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if comp.status == 'Pending' %}
+                            <a href="{{ url_for('resolve_complaint', complaint_id=comp.id) }}" class="btn btn-success btn-sm">
+                                Mark Resolved
+                            </a>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

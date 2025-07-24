@@ -22,20 +22,20 @@
                 <p class="card-text">{{ s.description }}</p>
                 <p><strong>Price:</strong> ₹{{ s.price }}</p>
                 <p><strong>Location:</strong> {{ s.location }}</p>
-             <p>
-    Rating:
-    {% if s.avg_rating > 0 %}
-        {% for i in range(s.avg_rating|round|int) %}
-            ⭐
-        {% endfor %}
-        ({{ s.avg_rating }}/5)
-    {% else %}
-        No ratings yet
-    {% endif %}
-</p>
+                <p>
+                Rating:
+                {% if s.avg_rating > 0 %}
+                    {% for i in range(s.avg_rating|round|int) %}
+                        ⭐
+                    {% endfor %}
+                    ({{ s.avg_rating }}/5)
+                {% else %}
+                    No ratings yet
+                {% endif %}
+            </p>
 
 {% if current_user.is_authenticated and current_user.role == 'customer' %}
-    <a href="{{ url_for('hire', service_id=service.id) }}" class="btn btn-primary">Hire</a>
+    <a href="{{ url_for('hire', service_id=s.id) }}" class="btn btn-primary">Hire</a>
 {% endif %}
 
 

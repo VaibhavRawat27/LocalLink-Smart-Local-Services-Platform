@@ -2,6 +2,24 @@
 {% block content %}
 <h2 class="mb-4">Welcome, {{ current_user.username }} (Customer)</h2>
 
+<!-- ✅ Complaint Form -->
+<div class="card mb-4 shadow">
+    <div class="card-body">
+        <h4 class="card-title">Submit a Complaint</h4>
+        <form method="POST" action="{{ url_for('submit_complaint') }}">
+            <div class="mb-3">
+                <label for="subject" class="form-label">Subject</label>
+                <input type="text" class="form-control" name="subject" placeholder="Enter complaint subject" required>
+            </div>
+            <div class="mb-3">
+                <label for="message" class="form-label">Complaint Details</label>
+                <textarea class="form-control" name="message" rows="3" placeholder="Describe your issue..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger">Submit Complaint</button>
+        </form>
+    </div>
+</div>
+
 <h4 class="mb-3">Explore and Book Services</h4>
 <div class="row">
     {% for provider in providers %}
@@ -11,13 +29,14 @@
                 <h5 class="card-title">{{ provider.service_name }}</h5>
                 <p class="card-text">{{ provider.description }}</p>
                 <p><strong>Rating:</strong> ⭐ {{ provider.rating }}</p>
+                
                 <a href="{{ url_for('book', provider_id=provider.id) }}" class="btn btn-success btn-sm">Book Now</a>
                 <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#rateModal{{provider.id}}">Rate</button>
             </div>
         </div>
     </div>
 
-    <!-- Rating Modal -->
+    <!-- ✅ Rating Modal -->
     <div class="modal fade" id="rateModal{{provider.id}}" tabindex="-1">
         <div class="modal-dialog">
             <form method="POST" action="{{ url_for('rate', provider_id=provider.id) }}">
