@@ -4,6 +4,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+from sqlalchemy.sql import func
+
 
 # -------------------- Flask Setup --------------------
 app = Flask(__name__)
@@ -40,12 +42,22 @@ class Service(db.Model):
 
     provider = db.relationship('User', backref='services')
 
+    @property
+    def avg_rating(self):
+        avg = db.session.query(func.avg(Booking.rating)).filter(
+            Booking.service_id == self.id,
+            Booking.rating > 0
+        ).scalar()
+        return round(avg, 1) if avg else 0
+
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     provider_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
     status = db.Column(db.String(50), default='Pending')
+    rating = db.Column(db.Integer, default=0)  # ⭐ NEW FIELD (0 means not rated yet)
+
 
 class Chat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,7 +75,10 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    services = Service.query.filter_by(is_available=True).all()
+    return render_template('index.html', services=services)
+
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -94,8 +109,15 @@ def login():
 
         login_user(user)
         flash('Logged in successfully!', 'success')
-        return redirect(url_for('index'))
+
+        # ✅ Redirect based on role
+        if user.role == "admin":
+            return redirect(url_for('admin'))
+        else:
+            return redirect(url_for('index'))
+
     return render_template('login.html')
+
 
 @app.route('/logout')
 @login_required
@@ -139,8 +161,9 @@ def services():
     if location:
         services = services.filter(Service.location.contains(location))
 
-    services = services.all()
+    services = services.all()  # ✅ Just fetch directly, no manual avg_rating assignment
     return render_template('services.html', services=services)
+
 
 @app.route('/hire/<int:service_id>')
 @login_required
@@ -149,8 +172,8 @@ def hire(service_id):
     new_booking = Booking(customer_id=current_user.id, provider_id=service.provider_id, service_id=service.id, status="Hired")
     db.session.add(new_booking)
     db.session.commit()
-    flash(f'You hired {service.name}! Chat is now enabled.', 'success')
-    return redirect(url_for('chat', provider_id=service.provider_id))
+    # flash(f'You hired {service.name}! Chat is now enabled.', 'success')
+    return redirect(url_for('rate_service', booking_id=new_booking.id))
 
 # ----------- Chat System ------------
 
@@ -168,6 +191,28 @@ def chat(provider_id):
     provider = User.query.get(provider_id)
     return render_template('chat.html', chats=chats, provider=provider)
 
+@app.route('/rate/<int:booking_id>', methods=['GET', 'POST'])
+@login_required
+def rate_service(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+
+    if booking.customer_id != current_user.id:
+        flash("You can only rate your own bookings.", "danger")
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        rating = int(request.form['rating'])
+        if 1 <= rating <= 5:
+            booking.rating = rating
+            db.session.commit()
+            flash("Thank you for rating!", "success")
+            return redirect(url_for('index'))
+        else:
+            flash("Invalid rating.", "danger")
+
+    return render_template('rate_service.html', booking=booking)
+
+
 # ----------- Admin Dashboard ------------
 
 @app.route('/admin')
@@ -176,9 +221,18 @@ def admin():
     if current_user.role != 'admin':
         flash('Admin access only.', 'danger')
         return redirect(url_for('index'))
-    users = User.query.all()
+
+    providers = User.query.filter_by(role='provider').all()
+    customers = User.query.filter_by(role='customer').all()
+    active_services = Service.query.filter_by(is_available=True).all()
     bookings = Booking.query.all()
-    return render_template('admin_dashboard.html', users=users, bookings=bookings)
+
+    return render_template('admin_dashboard.html',
+                           providers=providers,
+                           customers=customers,
+                           active_services=active_services,
+                           bookings=bookings)
+
 
 # -------------------- Run & Auto Admin Creation --------------------
 
