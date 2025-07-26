@@ -1,7 +1,5 @@
 # Local Link
 
-![Local Link Banner](screenshots/banner.png)
-
 ## 📌 Project Overview
 **Local Link** is a local service provider platform designed to connect **service providers** with **customers** seamlessly.  
 Built with **Flask, SQLAlchemy, and Flask-Login**, this project is ideal for **students, beginners, and learners** who want to understand how real-world service platforms are built.
@@ -61,14 +59,15 @@ LocalLink/
 
 ## 📸 Screenshots
 
-### 1. Homepage
-![Homepage](screenshots/homepage.png)
+<img width="1348" height="630" alt="image" src="https://github.com/user-attachments/assets/ff9dca56-14a1-4d29-bcac-73db07454bf5" />
 
-### 2. Profile Page
-![Profile Page](screenshots/profile_page.png)
+<img width="1348" height="626" alt="image" src="https://github.com/user-attachments/assets/d1987558-a5c1-4356-8ae5-25c670714a26" />
 
-### 3. Admin Dashboard
-![Admin Dashboard](screenshots/admin_dashboard.png)
+<img width="1345" height="623" alt="image" src="https://github.com/user-attachments/assets/544cf1d0-b208-497c-9002-7e6656daf765" />
+
+<img width="1349" height="631" alt="image" src="https://github.com/user-attachments/assets/95f93a09-d5f8-48f0-81c7-8dbd23610077" />
+
+<img width="1343" height="627" alt="image" src="https://github.com/user-attachments/assets/8808618d-941a-49f1-8225-1864619e6836" />
 
 ---
 
