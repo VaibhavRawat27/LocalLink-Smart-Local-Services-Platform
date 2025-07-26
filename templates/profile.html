@@ -1,15 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="mb-4">Manage Profile (Service Provider)</h2>
-<form method="POST" class="card p-4 shadow-sm">
-    <div class="mb-3">
-        <label>Service Name</label>
-        <input type="text" name="service_name" class="form-control" value="{{ provider.service_name }}" required>
+
+<div class="container mt-4">
+    <h2>My Profile</h2>
+    <div class="card shadow p-4">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label"><strong>Username:</strong></label>
+                <input type="text" class="form-control" value="{{ user.username }}" disabled>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label"><strong>Email:</strong></label>
+                <input type="email" class="form-control" value="{{ user.email }}" disabled>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label"><strong>Role:</strong></label>
+                <input type="text" class="form-control" value="{{ user.role }}" disabled>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label"><strong>Phone:</strong></label>
+                <input type="text" name="phone" class="form-control" value="{{ user.phone or '' }}" placeholder="Enter phone number">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label"><strong>Location:</strong></label>
+                <input type="text" name="location" class="form-control" value="{{ user.location or '' }}" placeholder="Enter city">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
     </div>
-    <div class="mb-3">
-        <label>Description</label>
-        <textarea name="description" class="form-control" rows="4" required>{{ provider.description }}</textarea>
-    </div>
-    <button type="submit" class="btn btn-primary">Update Profile</button>
-</form>
+</div>
+
 {% endblock %}

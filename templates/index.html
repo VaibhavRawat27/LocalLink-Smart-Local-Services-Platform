@@ -4,39 +4,69 @@
 <h2 class="mb-4">Available Services</h2>
 
 <div class="row">
-    {% for service in services %}
+    {% if services %}
+        {% for service in services %}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">{{ service.name }}</h5>
+                    <p class="card-text">{{ service.description[:100] }}...</p>
+                    <p><strong>Price:</strong> ₹{{ service.price }}</p>
+                    <p class="text-muted"><strong>Location:</strong> {{ service.location }}</p>
+
+                    <p>
+                        <strong>Rating:</strong>
+                        {% if service.avg_rating > 0 %}
+                            {% for i in range(service.avg_rating|round|int) %}
+                                ⭐
+                            {% endfor %}
+                            ({{ service.avg_rating }}/5)
+                        {% else %}
+                            No ratings yet
+                        {% endif %}
+                    </p>
+
+                    {% if current_user.is_authenticated and current_user.role == 'customer' %}
+                        <a href="{{ url_for('book', service_id=service.id) }}" class="btn btn-primary btn-sm">Book Now</a>
+                        <a href="{{ url_for('hire', service_id=service.id) }}" class="btn btn-warning btn-sm ms-2">Rate Now</a>
+                    {% else %}
+                        <p class="text-muted"><small>Login as a customer to book this service</small></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">No services available right now.</p>
+    {% endif %}
+</div>
+
+<hr class="my-4">
+
+<h3 class="mt-4">Services Near You</h3>
+{% if nearby_services and nearby_services|length > 0 %}
+<div class="row">
+    {% for service in nearby_services %}
     <div class="col-md-4 mb-3">
-        <div class="card shadow">
+        <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">{{ service.name }}</h5>
-                <p class="card-text">{{ service.description[:100] }}...</p>
+                <p class="card-text">{{ service.description[:80] }}...</p>
                 <p><strong>Price:</strong> ₹{{ service.price }}</p>
-                <p class="text-muted">Location: {{ service.location }}</p>
- <p>
-                Rating:
-                {% if service.avg_rating > 0 %}
-                    {% for i in range(service.avg_rating|round|int) %}
-                        ⭐
-                    {% endfor %}
-                    ({{ service.avg_rating }}/5)
-                {% else %}
-                    No ratings yet
-                {% endif %}
-            </p>
+                <p class="text-muted"><strong>Location:</strong> {{ service.location }}</p>
+
                 {% if current_user.is_authenticated and current_user.role == 'customer' %}
-                    <a href="{{ url_for('book', service_id=service.id) }}" class="btn btn-primary">Book Now</a>
+                    <a href="{{ url_for('book', service_id=service.id) }}" class="btn btn-success btn-sm">Book Now</a>
                 {% else %}
                     <p class="text-muted"><small>Login as a customer to book this service</small></p>
                 {% endif %}
-
-                {% if current_user.is_authenticated and current_user.role == 'customer' %}
-    <a href="{{ url_for('hire', service_id=service.id) }}" class="btn btn-primary">Rate Now</a>
-{% endif %}
             </div>
         </div>
     </div>
-    {% else %}
-    <p>No services available right now.</p>
     {% endfor %}
 </div>
+{% else %}
+<p class="text-muted">No nearby services found in {{ current_user.location }} yet.</p>
+{% endif %}
+
 {% endblock %}

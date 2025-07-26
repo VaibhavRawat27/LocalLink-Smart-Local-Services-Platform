@@ -101,8 +101,36 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
+    # All available services
     services = Service.query.filter_by(is_available=True).all()
-    return render_template('index.html', services=services)
+
+    # Services near the current user
+    nearby_services = []
+    if current_user.is_authenticated and current_user.location:
+        nearby_services = Service.query.filter(
+            Service.location.contains(current_user.location),
+            Service.is_available == True
+        ).all()
+
+    return render_template(
+        'index.html',
+        services=services,
+        nearby_services=nearby_services
+    )
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        # Update phone & location
+        current_user.phone = request.form['phone']
+        current_user.location = request.form['location']
+        db.session.commit()
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for('profile'))
+
+    return render_template('profile.html', user=current_user)
+
 
 @app.context_processor
 def inject_provider_notifications():
@@ -120,14 +148,19 @@ def register():
         email = request.form['email']
         password = generate_password_hash(request.form['password'], method='pbkdf2:sha256')
         role = request.form['role']
-        location = request.form.get('location')
+        location = request.form['location']  # ✅ make sure this matches the form name
 
         new_user = User(username=username, email=email, password=password, role=role, location=location)
         db.session.add(new_user)
         db.session.commit()
+
         flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
+
     return render_template('register.html')
+
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
