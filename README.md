@@ -75,7 +75,7 @@ LocalLink/
 
 1. **Clone the repository**  
 ```bash
-git clone https://github.com/your-username/local-link.git
+git clone https://github.com/vaibhavrawat27/local-link.git
 cd local-link
 ```
 
